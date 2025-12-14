@@ -3,7 +3,7 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useUser } from '@civic/auth/react';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -26,7 +26,8 @@ interface NavbarProps {
 export default function Navbar({ className = "" }: NavbarProps) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, signOut } = useUser();
+    const { user, isLoaded } = useUser();
+    const { signOut } = useClerk();
 
     // Define routes that should not show navbar
     const hideNavbarRoutes = ['/', '/variations'];
@@ -84,12 +85,12 @@ export default function Navbar({ className = "" }: NavbarProps) {
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="font-medium flex items-center gap-2 pl-3 pr-4 bg-transparent border-transparent">
                             <Avatar className="h-8 w-8">
-                                <AvatarImage src={user?.picture || ""} alt={user?.name} />
+                                <AvatarImage src={user?.imageUrl || ""} alt={user?.firstName || 'User'} />
                                 <AvatarFallback className="bg-blue-400 text-blue-800">
-                                    {user?.name?.charAt(0).toUpperCase()}
+                                    {user?.firstName?.charAt(0).toUpperCase() || 'U'}
                                 </AvatarFallback>
                             </Avatar>
-                            <span>{user?.name}</span>
+                            <span>{user?.firstName || 'User'}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">
@@ -97,7 +98,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                             className="cursor-pointer flex items-center text-red-600"
-                            onClick={signOut}
+                            onClick={() => signOut({ redirectUrl: '/' })}
                         >
                             <LogOut className="h-4 w-4 mr-2" />
                             <span>Log out</span>

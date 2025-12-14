@@ -10,7 +10,7 @@ import { BackgroundLines } from "@/components/ui/background-lines";
 
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useUser } from "@civic/auth/react";
+import { useUser } from "@clerk/nextjs";
 
 
 
@@ -104,20 +104,14 @@ const features = [
 
 export default function Home() {
     const router = useRouter();
-    const { user, signIn } = useUser();
+    const { user, isLoaded } = useUser();
 
     useEffect(() => {
-        if (user) {
-            const keysToSync = ['access_token', 'id_token', 'refresh_token', 'oidc_session_expires_at']; // or dynamic
-            keysToSync.forEach((key) => {
-                const value = localStorage.getItem(key);
-                if (value) {
-                    document.cookie = `${key}=${value}; path=/; max-age=3600; secure; samesite=None`;
-                }
-            });
-            router.push('starting');
+        if (isLoaded && user) {
+            router.push('/starting');
         }
-    }, [user]);
+    }, [user, isLoaded, router]);
+
     return (
         <div>
             <BackgroundLines className="flex items-center justify-center w-full flex-col px-4">
@@ -126,8 +120,7 @@ export default function Home() {
                     description="Map your thoughts, stress-test them with AI, and pitch safely — all before writing a single line of code."
                     primaryCta={{
                         text: "Start Ideating",
-                        // href: `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-                        onClick: signIn,
+                        onClick: () => router.push('/sign-in'),
                     }}
                     secondaryCta={{
                         text: "View us on GitHub",

@@ -1,10 +1,16 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  civicId: {
+  clerkId: {
     type: String,
     required: true,
     unique: true,
+  },
+  email: {
+    type: String,
+  },
+  name: {
+    type: String,
   },
 }, { timestamps: true });
 

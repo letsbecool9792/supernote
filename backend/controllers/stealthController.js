@@ -8,10 +8,7 @@ const postStealthPitch = async (req, res) => {
     try {
         const { title, pitch, amount } = req.body;
 
-        
-        // Assuming user ID is available in req.user from an auth middleware
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
 
         if (!pitch) {
             return res.status(400).json({ message: 'Pitch content is required.' });
@@ -57,10 +54,7 @@ const likePitch = async (req, res) => {
             return res.status(404).json({ message: 'Pitch not found.' });
         }
 
-        // Assuming user ID is available from auth middleware
-        const userId = req.user.id;
-        // const user = await req.civicAuth.getUser()?.id;
-
+        const userId = req.auth.userId;
 
         // Remove from dislikes if it exists there
         pitch.dislikes.pull(userId);
@@ -89,9 +83,7 @@ const dislikePitch = async (req, res) => {
             return res.status(404).json({ message: 'Pitch not found.' });
         }
 
-        const userId = req.user.id;
-        // const userId = await req.civicAuth.getUser()?.id;
-
+        const userId = req.auth.userId;
 
         // Remove from likes if it exists there
         pitch.likes.pull(userId);
@@ -118,9 +110,7 @@ const approvePitch = async (req, res) => {
             return res.status(404).json({ message: 'Pitch not found' });
         }
 
-        const userId = req.user.id;
-        // const userId = await req.civicAuth.getUser()?.id;
-
+        const userId = req.auth.userId;
 
         await StealthPitch.findByIdAndUpdate(req.params.id, {
             $addToSet: { approves: userId },
@@ -143,9 +133,7 @@ const rejectPitch = async (req, res) => {
             return res.status(404).json({ message: 'Pitch not found' });
         }
 
-        const userId = req.user.id;
-        // const userId = await req.civicAuth.getUser()?.id;
-
+        const userId = req.auth.userId;
 
         await StealthPitch.findByIdAndUpdate(req.params.id, {
             $addToSet: { rejects: userId },
@@ -175,9 +163,7 @@ const addComment = async (req, res) => {
             return res.status(404).json({ message: 'Pitch not found.' });
         }
 
-        const user = req.user.id;
-        // const user = await req.civicAuth.getUser()?.id;
-
+        const user = req.auth.userId;
 
         const comment = {
             user,
@@ -214,7 +200,7 @@ const deleteComment = async (req, res) => {
         }
 
         // Check if the user trying to delete is the one who created the comment
-        if (comment.user.toString() !== req.user.id.toString()) {
+        if (comment.user.toString() !== req.auth.userId.toString()) {
             return res.status(401).json({ message: 'Not authorized to delete this comment.' });
         }
 
@@ -245,7 +231,7 @@ const editPitch = async (req, res) => {
         }
 
         // Check ownership
-        if (pitch.user.toString() !== req.user.id.toString()) {
+        if (pitch.user.toString() !== req.auth.userId.toString()) {
             return res.status(401).json({ message: 'Not authorized to edit this pitch.' });
         }
 
@@ -271,7 +257,7 @@ const deleteStealthPitch = async (req, res) => {
         }
 
         // Check if the request is from the owner of the pitch
-        if (pitch.user.toString() !== req.user.id.toString()) {
+        if (pitch.user.toString() !== req.auth.userId.toString()) {
             return res.status(401).json({ message: 'Not authorized to delete this pitch.' });
         }
 

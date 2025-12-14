@@ -67,8 +67,7 @@ export const createProject = async (req, res) => {
     }
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
 
         const project = new Project({
             user: userId,
@@ -227,8 +226,7 @@ export const synthesizeDocument = async (req, res) => {
 
 export const getProjectById = async (req, res) => {
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
 
         const project = await Project.findOne({ _id: req.params.projectId, user: userId });
         if (project) {
@@ -244,8 +242,7 @@ export const getProjectById = async (req, res) => {
 
 export const getUserProjects = async (req, res) => {
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
         const projects = await Project.find({ user: userId }).sort({ createdAt: -1 });
         res.json(projects);
     } catch (error) {
@@ -260,8 +257,7 @@ export const updateProjectRating = async (req, res) => {
     const { projectId } = req.params;
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
         const project = await Project.findOne({ _id: projectId, user: userId });
         if (!project) return res.status(404).json({ message: 'Project not found.' });
 
@@ -289,8 +285,7 @@ export const generateValidationPitch = async (req, res) => {
     const { validationMetric } = req.body;
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
         const project = await Project.findOne({ _id: projectId, user: userId });
         if (!project) {
             return res.status(404).json({ message: 'Project not found.' });
@@ -332,8 +327,7 @@ export const regenerateNode = async (req, res) => {
     const { newPrompt } = req.body;
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
         const project = await Project.findOne({ _id: projectId, user: userId });
         if (!project) return res.status(404).json({ message: 'Project not found.' });
 
@@ -375,7 +369,7 @@ export const regenerateNode = async (req, res) => {
 export const deleteNode = async (req, res) => {
     const { projectId, nodeId } = req.params;
     try {
-        const project = await Project.findOne({ _id: projectId, user: req.user.id });
+        const project = await Project.findOne({ _id: projectId, user: req.auth.userId });
         if (!project) return res.status(404).json({ message: 'Project not found' });
 
         const initialNodeCount = project.nodes.length;
@@ -409,8 +403,7 @@ export const updateNodePositions = async (req, res) => {
     }
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
         const project = await Project.findOne({ _id: projectId, user: userId });
 
         if (!project) {

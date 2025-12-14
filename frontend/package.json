@@ -9,7 +9,7 @@
     "lint": "echo \"Skipping linting...\""
   },
   "dependencies": {
-    "@civic/auth": "^0.8.0",
+    "@clerk/nextjs": "^6.35.1",
     "@headlessui/react": "^2.2.4",
     "@motionone/utils": "^10.18.0",
     "@number-flow/react": "^0.5.10",

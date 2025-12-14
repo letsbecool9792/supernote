@@ -5,7 +5,7 @@ import { type ReactNode, useState } from "react";
 import { type State, WagmiProvider } from "wagmi";
 import "@rainbow-me/rainbowkit/styles.css";
 import { RainbowKitProvider, darkTheme } from "@rainbow-me/rainbowkit";
-import { CivicAuthProvider } from "@civic/auth/react";
+import { ClerkProvider } from "@clerk/nextjs";
 
 import { getConfig } from "./config";
 
@@ -19,17 +19,8 @@ export function Providers({ children, initialState }: Props) {
     const [queryClient] = useState(() => new QueryClient());
 
     return (
-        <CivicAuthProvider
-            clientId={process.env.NEXT_PUBLIC_CIVIC_CLIENT_ID!}
-            onSignIn={(error?: Error) => {
-                if (error) {
-                    console.log(error);
-                }
-                else {
-                    window.location.href = '/starting';
-                }
-            }}
-            onSignOut={() => window.location.replace('/')}
+        <ClerkProvider
+            publishableKey={process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY!}
         >
             <WagmiProvider config={config} initialState={initialState}>
                 <QueryClientProvider client={queryClient}>
@@ -48,6 +39,6 @@ export function Providers({ children, initialState }: Props) {
                     </RainbowKitProvider>
                 </QueryClientProvider>
             </WagmiProvider>
-        </CivicAuthProvider>
+        </ClerkProvider>
     );
 }

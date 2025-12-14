@@ -1,44 +1,33 @@
-import { CookieStorage, CivicAuth } from '@civic/auth/server';
-import dotenv from 'dotenv';
-dotenv.config();
-
-const civicConfig = {
-  clientId: process.env.CIVIC_CLIENT_ID,
-  // Note: We use process.env.PORT which should be set in your .env file
-  redirectUrl: `${process.env.BACKEND_URL}/auth/callback`,
-  postLogoutRedirectUrl: process.env.FRONTEND_URL,
-};
-
-// Custom cookie storage class that bridges Civic's needs with Express's req/res objects
-class ExpressCookieStorage extends CookieStorage {
-  constructor(req, res) {
-    super({ secure: process.env.NODE_ENV === 'production' });
-    this.req = req;
-    this.res = res;
-  }
-  async get(key) { return Promise.resolve(this.req.cookies[key] || null); }
-  async set(key, value) { this.res.cookie(key, value, this.settings); return Promise.resolve(); }
-  async delete(key) { this.res.clearCookie(key); return Promise.resolve(); }
-}
+import { clerkClient, requireAuth } from '@clerk/express';
 
 /**
- * Middleware to initialize the CivicAuth instance on every request.
- * This must run before the `protect` middleware.
+ * Protection middleware using Clerk.
+ * Ensures the user is authenticated before accessing protected routes.
  */
-export const initializeCivicAuth = (req, res, next) => {
-  req.storage = new ExpressCookieStorage(req, res);
-  req.civicAuth = new CivicAuth(req.storage, civicConfig);
-  next();
-};
+export const protect = requireAuth({
+  onError: (error) => {
+    console.error('Auth error:', error);
+  }
+});
 
 /**
- * The new protection middleware. It checks if a user has an active
- * Civic session cookie.
+ * Optional: Middleware to attach user object to request
+ * Use this after protect middleware if you need full user details
  */
-export const protect = async (req, res, next) => {
-  if (!(await req.civicAuth.isLoggedIn())) {
-    return res.status(401).json({ message: 'Unauthorized. Please log in.' });
+export const attachUserDetails = async (req, res, next) => {
+  try {
+    if (req.auth?.userId) {
+      const user = await clerkClient.users.getUser(req.auth.userId);
+      req.user = {
+        id: req.auth.userId,
+        email: user.emailAddresses[0]?.emailAddress,
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+        imageUrl: user.imageUrl
+      };
+    }
+    next();
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    next();
   }
-  
-  next();
 };

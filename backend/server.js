@@ -1,17 +1,17 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import cookieParser from 'cookie-parser'; // NEW: Required for Civic Auth
+import cookieParser from 'cookie-parser';
 import listEndpoints from 'express-list-endpoints';
+import { clerkMiddleware } from '@clerk/express';
 
 // --- Local Imports ---
 import connectDB from './config/db.js';
-import { initializeCivicAuth, protect } from './middleware/authMiddleware.js'; // UPDATED: Import new middleware
-import authRoutes from './routes/authRoutes.js'; // This is now for the Civic redirect routes
+import { protect } from './middleware/authMiddleware.js';
+import authRoutes from './routes/authRoutes.js';
 import ideaRoutes from './routes/ideaRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import documentRoutes from './routes/documentRoutes.js';
-// Note: your code mentioned stealthRoutes, so I've included it.
 import stealthRoutes from './routes/stealthRoutes.js';
 
 
@@ -33,8 +33,8 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser()); // NEW: Must be used BEFORE Civic middleware
-app.use(initializeCivicAuth); // NEW: Initializes Civic on every request
+app.use(cookieParser());
+app.use(clerkMiddleware()); // Clerk authentication middleware
 
 
 // --- Public Authentication Routes ---

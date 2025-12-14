@@ -35,7 +35,7 @@ export const uploadDocument = async (req, res) => {
         indexName: "default",
         textKey: "text",
         embeddingKey: "embedding",
-        metadata: { userId: req.user.id }
+        metadata: { userId: req.auth.userId }
       }
     );
 
