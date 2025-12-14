@@ -67,16 +67,16 @@ export function Features({
   };
 
   return (
-    <div className="min-h-screen py-16 px-4">
+    <div className="min-h-screen py-12 md:py-16 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-12 md:mb-16">
           <span
-            className={`text-sky-500 font-semibold text-sm uppercase tracking-wider`}
+            className={`text-sky-500 font-semibold text-xs md:text-sm uppercase tracking-wider`}
           >
            Its like ChatGPT, but it tells you your idea sucks — politely
           </span>
-          <h2 className="text-4xl md:text-5xl font-bold text-black dark:text-white mt-4 mb-6">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-black dark:text-white mt-3 md:mt-4 mb-4 md:mb-6">
           We treat ideas like living systems, not just text
           </h2>
         </div>

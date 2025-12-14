@@ -44,22 +44,23 @@ export function HeroWithMockup({
         <section
             className={cn(
                 "relative text-foreground",
-                "py-12 px-4 md:py-24 lg:py-32",
+                "py-8 px-4 md:py-16 lg:py-20",
                 "overflow-hidden",
                 className,
             )}
         >
-            <div className="relative mx-auto max-w-[1280x] flex flex-col gap-12 lg:gap-24">
-                <div className="relative z-10 flex flex-col items-center gap-6 pt-8 md:pt-16 text-center lg:gap-12">
+            <div className="relative mx-auto max-w-7xl flex flex-col gap-8 md:gap-12">
+                <div className="relative z-10 flex flex-col items-center gap-4 md:gap-6 pt-4 md:pt-8 text-center">
                     {/* Heading */}
                     <h1
                         className={cn(
                             "inline-block animate-appear",
                             "bg-gradient-to-b from-foreground via-foreground/90 to-muted-foreground",
                             "bg-clip-text text-transparent",
-                            "text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl",
-                            "leading-[1.4] sm:leading-[1.2]",
+                            "text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl",
+                            "leading-tight",
                             "drop-shadow-sm dark:drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]",
+                            "max-w-5xl",
                         )}
                     >
                         {title}
@@ -68,10 +69,10 @@ export function HeroWithMockup({
                     {/* Description */}
                     <p
                         className={cn(
-                            "max-w-[1000px] animate-appear opacity-0 [animation-delay:150ms]",
-                            "text-base sm:text-lg md:text-8xl",
+                            "max-w-2xl animate-appear opacity-0 [animation-delay:150ms]",
+                            "text-sm sm:text-base md:text-lg lg:text-xl",
                             "text-muted-foreground",
-                            "font-medium",
+                            "font-normal",
                         )}
                     >
                         {description}
@@ -83,16 +84,16 @@ export function HeroWithMockup({
             animate-appear opacity-0 [animation-delay:300ms]"
                     >
                         <Button
-                            asChild
                             size="lg"
                             className={cn(
-                                "bg-black hover:bg-gray-800",
+                                "bg-black hover:bg-emerald-600",
                                 "text-white shadow-lg",
                                 "transition-all duration-300",
+                                "cursor-pointer",
                             )}
                             onClick={primaryCta.onClick}
                         >
-                            <a>{primaryCta.text}</a>
+                            {primaryCta.text}
                         </Button>
 
                         <Button
@@ -100,27 +101,21 @@ export function HeroWithMockup({
                             size="lg"
                             variant="outline"
                             className={cn(
-                                "bg-black hover:bg-gray-800",
-                                "text-white border-black hover:border-gray-800",
+                                "bg-white hover:bg-gray-100 dark:bg-black dark:hover:bg-gray-900",
+                                "text-black dark:text-white border-gray-300 dark:border-gray-700",
+                                "hover:border-gray-400 dark:hover:border-gray-600",
                                 "transition-all duration-300",
+                                "cursor-pointer",
                             )}
                         >
-                            <a href={secondaryCta.href}>
+                            <a href={secondaryCta.href} className="flex items-center">
                                 {secondaryCta.icon}
                                 {secondaryCta.text}
                             </a>
                         </Button>
                     </div>
 
-                    {/* Mockup */}
-                    <div className="relative w-full pt-12 px-4 sm:px-6 lg:px-8">
-                        <img
-                            {...mockupImage}
-                            className="w-full h-auto animate-appear opacity-0 [animation-delay:700ms]"
-                            loading="lazy"
-                            decoding="async"
-                        />
-                    </div>
+                    
                 </div>
             </div>
 

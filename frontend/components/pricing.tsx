@@ -69,12 +69,12 @@ export function Pricing({
   };
 
   return (
-    <div className="container py-20">
-      <div className="text-center space-y-4 mb-12">
-        <h2 className="text-4xl font-bold tracking-tight sm:text-5xl">
+    <div className="container py-12 md:py-16">
+      <div className="text-center space-y-3 mb-8 md:mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight">
           {title}
         </h2>
-        <p className="text-muted-foreground text-lg whitespace-pre-line">
+        <p className="text-muted-foreground text-base md:text-lg whitespace-pre-line max-w-2xl mx-auto">
           {description}
         </p>
       </div>
