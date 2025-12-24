@@ -1,32 +1,14 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Lightbulb, Target, TrendingUp } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 import axios from 'axios';
+import Markdown from 'react-markdown';
 
 interface AnalysisData {
     analysis: string;
     variations: string[];
 }
-
-// Simple markdown to HTML converter for basic formatting
-const markdownToHtml = (markdown: string): string => {
-    return markdown
-        // Headers
-        .replace(/^### (.*$)/gim, '<h3 class="text-xl font-bold text-black mt-6 mb-3">$1</h3>')
-        .replace(/^## (.*$)/gim, '<h2 class="text-2xl font-bold text-black mt-8 mb-4">$1</h2>')
-        .replace(/^# (.*$)/gim, '<h1 class="text-3xl font-bold text-black mt-8 mb-4">$1</h1>')
-        // Bold text
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold text-black">$1</strong>')
-        // Italic text
-        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-        // Line breaks
-        .replace(/\n\n/g, '</p><p class="text-black leading-relaxed mb-4 text-lg">')
-        // Bullet points
-        .replace(/^- (.*$)/gim, '<li class="ml-4 mb-2">$1</li>')
-        // Wrap consecutive list items in ul tags
-        .replace(/(<li.*<\/li>\s*)+/g, '<ul class="list-disc list-inside mb-4 text-black">$&</ul>');
-};
 
 const IdeaAnalysisPage: React.FC = () => {
     const [data, setData] = useState<AnalysisData | null>(null);
@@ -115,36 +97,25 @@ const IdeaAnalysisPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 p-6">
+        <div className="min-h-screen bg-gray-50 py-12 px-6">
             <div className="max-w-6xl mx-auto">
                 {/* Header */}
-                <div className="text-center mb-12">
-                    <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-500 rounded-full mb-4">
-                        <Target className="w-8 h-8 text-white" />
-                    </div>
-                    <h1 className="text-4xl font-bold text-black mb-4">Idea Analysis</h1>
-                    <div className="w-24 h-1 bg-blue-500 mx-auto rounded-full"></div>
+                <div className="mb-12">
+                    <h1 className="text-4xl font-bold text-gray-900 mb-2">Idea Analysis</h1>
+                    <p className="text-gray-600">Review your strategic analysis and explore variations</p>
                 </div>
 
                 {/* Analysis Section */}
-                <div className="mb-16">
-                    <div className="bg-white rounded-2xl shadow-xl p-8 border border-blue-100">
-                        <div className="flex items-center mb-6">
-                            <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
-                                <TrendingUp className="w-6 h-6 text-white" />
-                            </div>
-                            <h2 className="text-2xl font-bold text-black">Strategic Analysis</h2>
-                        </div>
-                        <div className="prose prose-lg max-w-none">
+                <div className="mb-12">
+                    <div className="bg-white rounded-lg shadow-sm p-8 border border-gray-200">
+                        <h2 className="text-2xl font-bold text-gray-900 mb-6">Strategic Analysis</h2>
+                        <div className="prose prose-lg max-w-none text-gray-700">
                             {data?.analysis ? (
-                                <div
-                                    className="text-black leading-relaxed text-lg"
-                                    dangerouslySetInnerHTML={{
-                                        __html: `<p class="text-black leading-relaxed mb-4 text-lg">${markdownToHtml(data.analysis)}</p>`
-                                    }}
-                                />
+                                <Markdown>
+                                    {data.analysis}
+                                </Markdown>
                             ) : (
-                                <p className="text-black text-lg">No analysis available</p>
+                                <p className="text-gray-500">No analysis available</p>
                             )}
                         </div>
                     </div>
@@ -152,12 +123,7 @@ const IdeaAnalysisPage: React.FC = () => {
 
                 {/* Variations Section */}
                 <div>
-                    <div className="flex items-center justify-center mb-8">
-                        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
-                            <Lightbulb className="w-6 h-6 text-white" />
-                        </div>
-                        <h2 className="text-3xl font-bold text-black">Idea Variations</h2>
-                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-6">Idea Variations</h2>
 
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {data?.variations && data.variations.length > 0 ? (
@@ -170,39 +136,27 @@ const IdeaAnalysisPage: React.FC = () => {
                                     <div
                                         key={index}
                                         onClick={() => handleVariationClick(index)}
-                                        className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100 cursor-pointer transition-all duration-300 hover:shadow-2xl hover:scale-105 hover:border-blue-300 group"
+                                        className="bg-white rounded-lg shadow-sm p-6 border border-gray-200 cursor-pointer transition-all duration-200 hover:shadow-md hover:border-gray-300 group"
                                     >
                                         <div className="flex items-center justify-between mb-4">
-                                            <div className="flex items-center">
-                                                <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
-                                                    <span className="text-white font-bold text-sm">{index + 1}</span>
-                                                </div>
-                                                <h3 className="text-lg font-bold text-black">
-                                                    {title}
-                                                </h3>
-                                            </div>
-                                            <ArrowRight className="w-5 h-5 text-blue-500 transform transition-transform group-hover:translate-x-1" />
+                                            <h3 className="text-lg font-bold text-gray-900">
+                                                {title}
+                                            </h3>
+                                            <ArrowRight className="w-5 h-5 text-gray-400 transform transition-transform group-hover:translate-x-1 group-hover:text-gray-600" />
                                         </div>
 
-                                        <p className="text-gray-700 text-sm">{description}</p>
-
-                                        <div className="mt-4 pt-4 border-t border-blue-100">
-                                            <span className="text-blue-600 font-medium text-sm group-hover:text-blue-700 transition-colors">
-                                                Explore this variation →
-                                            </span>
+                                        <div className="prose prose-sm max-w-none text-gray-700">
+                                            <Markdown>
+                                                {description}
+                                            </Markdown>
                                         </div>
                                     </div>
                                 );
                             })
                         ) : (
-                            <p className="text-black text-center col-span-full">No variations available</p>
+                            <p className="text-gray-500 text-center col-span-full">No variations available</p>
                         )}
                     </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-16 text-center">
-                    <div className="w-16 h-1 bg-blue-500 mx-auto rounded-full"></div>
                 </div>
             </div>
         </div>

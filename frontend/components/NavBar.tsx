@@ -30,7 +30,7 @@ export default function Navbar({ className = "" }: NavbarProps) {
     const { signOut } = useClerk();
 
     // Define routes that should not show navbar
-    const hideNavbarRoutes = ['/', '/variations'];
+    const hideNavbarRoutes = ['/', '/sign-in', '/sign-up'];
     
     // If current route should not show navbar, return null
     if (hideNavbarRoutes.includes(pathname)) {
