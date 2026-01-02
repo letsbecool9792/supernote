@@ -109,8 +109,11 @@ export const converseWithNode = async (req, res) => {
     }
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
         const project = await Project.findOne({ _id: projectId, user: userId });
 
         if (!project) {
@@ -119,49 +122,55 @@ export const converseWithNode = async (req, res) => {
 
         const conversation_history = buildHierarchicalContext(project.nodes, project.edges, parentNodeId);
 
-        // Define a Zod schema to enforce the AI's output structure.
-        const titleAndContentSchema = z.object({
-            title: z.string().describe("A concise, 5-10 word title for the generated content."),
-            content: z.string().describe("The full, detailed response to the user's question."),
-        });
-
-        // The prompt no longer needs to mention JSON formatting.
+        // Updated prompt to explicitly request JSON
         const llmPromptTemplate = PromptTemplate.fromTemplate(
             `You are an expert research assistant. Given the conversation history, intelligently answer the user's question and provide a suitable title for your response.
 
             Conversation History (for context):\n{conversation_history}\n\n
-            User's Question:\n{question}\n\n`
+            User's Question:\n{question}\n\n
+            
+            You must respond with a valid JSON object in this exact format:
+            {{
+                "title": "A concise, 5-10 word title",
+                "content": "The full, detailed response to the user's question"
+            }}
+            
+            Do not include any markdown formatting, code blocks, or additional text. Only return the raw JSON object.`
         );
 
-        // Bind the schema to the model to enforce structured output.
-        // This is much more reliable than parsing raw text.
-        const structuredOutputModel = chatModel.withStructuredOutput(titleAndContentSchema);
+        const chain = llmPromptTemplate.pipe(chatModel).pipe(new StringOutputParser());
 
-        const chain = RunnableSequence.from([
-            {
-                question: (input) => input.question,
-                conversation_history: (input) => input.conversation_history,
-                context: async (input) => {
-                    if (!useRAG) return "No documents requested.";
-                    const vectorStore = new MongoDBAtlasVectorSearch(embeddingModel, {
-                        collection: collection('vectors'),
-                        indexName: "default",
-                    });
-                    const retriever = vectorStore.asRetriever({ filter: { preFilter: { userId: input.userId } } });
-                    const docs = await retriever.getRelevantDocuments(input.question);
-                    return docs.map(doc => doc.pageContent).join('\n---\n');
-                }
-            },
-            llmPromptTemplate,
-            structuredOutputModel, // Use the new model with enforced structured output
-        ]);
-
-        // The result will be a clean, validated object: { title: string, content: string }
-        const result = await chain.invoke({
+        // The result will be a string that we need to parse
+        const rawResult = await chain.invoke({
             question: prompt,
             conversation_history: conversation_history,
-            userId: userId
         });
+
+        console.log('Raw AI Response:', rawResult);
+
+        // Clean up the response - remove markdown code blocks if present
+        let cleanedResult = rawResult.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        
+        // Find the JSON object
+        const firstBraceIndex = cleanedResult.indexOf('{');
+        const lastBraceIndex = cleanedResult.lastIndexOf('}');
+        
+        if (firstBraceIndex === -1 || lastBraceIndex === -1) {
+            console.error('No JSON object found in response:', cleanedResult);
+            throw new Error("AI response did not contain a valid JSON object.");
+        }
+        
+        let jsonString = cleanedResult.substring(firstBraceIndex, lastBraceIndex + 1);
+        
+        // Remove any control characters and fix common JSON issues
+        jsonString = jsonString
+            .replace(/[\u0000-\u001F\u007F-\u009F\u00A0]/g, "")
+            .replace(/,(\s*[}\]])/g, '$1') // Remove trailing commas
+            .replace(/\n/g, ' '); // Replace newlines with spaces
+        
+        console.log('Cleaned JSON string:', jsonString);
+        
+        const result = JSON.parse(jsonString);
 
         const newNode = {
             id: `node_${Date.now()}`,
@@ -184,7 +193,15 @@ export const converseWithNode = async (req, res) => {
 
     } catch (error) {
         console.error('Error during conversation:', error);
-        res.status(500).json({ message: 'Server error during conversation.' });
+        console.error('Error details:', {
+            message: error.message,
+            stack: error.stack,
+            name: error.name
+        });
+        res.status(500).json({ 
+            message: 'Server error during conversation.',
+            error: error.message 
+        });
     }
 };
 
@@ -192,8 +209,11 @@ export const synthesizeDocument = async (req, res) => {
     const { projectId } = req.params;
 
     try {
-        const _user = await req.civicAuth.getUser();
-        const userId = _user.id;
+        const userId = req.auth.userId;
+        if (!userId) {
+            return res.status(401).json({ message: 'Unauthorized' });
+        }
+        
         const project = await Project.findOne({ _id: projectId, user: userId });
         if (!project) {
             return res.status(404).json({ message: 'Project not found.' });

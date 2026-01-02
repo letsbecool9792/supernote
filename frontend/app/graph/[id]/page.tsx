@@ -32,8 +32,6 @@ import {
     ShieldAlert,
     ChevronDown,
     ChevronUp,
-    Lightbulb,
-    LoaderCircle,
     ThumbsUp,
     ThumbsDown,
 } from "lucide-react";
@@ -46,7 +44,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { RequestGrantButton } from "@/components/web3/RequestGrantButton";
-import ModalDialog from "@/components/ModalDialog";
 
 // Extend Window interface
 declare global {
@@ -204,20 +201,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedParentId, setSelectedParentId] = useState<string>("");
     const [selectedParentTitle, setSelectedParentTitle] = useState<string>("");
-    const [isIdeateOpen, setIsIdeateOpen] = useState(true);
     const [isEvaluateOpen, setIsEvaluateOpen] = useState(true);
-    // const [evaluations] = useState({
-    //     opportunity: { score: 9 },
-    //     problem: { score: 10 },
-    //     feasibility: { score: 6 },
-    //     whyNow: { score: 9 },
-    // });
-
-    const [selectedValidatePresetItem, setSelectedValidatePresetItem] = useState<number>(-1);
-    const [customValidatePrompt, setCustomValidatePrompt] = useState<string>("");
-    const [generatingPitch, setGeneratingPitch] = useState(false);
-    const [stealthPitchDialogOpen, setStealthPitchDialogOpen] = useState(false);
-    const [stealthPitch, setStealthPitch] = useState<string>("");
 
     // const [evaluations] = useState({
     //     opportunity: { score: 9 },
@@ -364,40 +348,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         }
     }, [projectId, nodes]);
 
-    const generateStealthPitch = useCallback(async (validationMetric: string) => {
-        setGeneratingPitch(true);
-        try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/generate-pitch`,
-                { validationMetric }, { withCredentials: true });
 
-            if (response?.data) {
-                // console.log(response.data);
-                setStealthPitch(response.data.pitch);
-                setStealthPitchDialogOpen(true);
-            }
-        } catch (error) {
-            console.error("Error loading project:", error);
-        } finally {
-            setGeneratingPitch(false);
-        }
-    }, [projectId]);
-
-    const postPitch = useCallback(async () => {
-        try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/stealth`,
-                {
-                    title: 'untitled',
-                    pitch: stealthPitch,
-                    amount: 0.05,
-                }, { withCredentials: true });
-
-            if (response?.data) {
-                console.log(response.data);
-            }
-        } catch (error) {
-            console.error("Error loading project:", error);
-        }
-    }, [stealthPitch]);
 
     useEffect(() => {
         window.__handleNodeClick = handleNodeClick;
@@ -465,10 +416,10 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
     }
 
     return (
-        <div className="w-full h-screen bg-gray-100">
+        <div className="w-full bg-gray-100">
 
-            <div className="flex h-full w-full">
-                <div className="flex-grow h-full">
+            <div className="flex">
+                <div className="flex-grow h-[calc(100vh-4rem)] sticky top-[4rem]">
                     <ReactFlow
                         nodes={nodes}
                         edges={edges}
@@ -488,88 +439,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
                     </ReactFlow>
                 </div>
 
-                <div className="w-96 bg-white border-l border-gray-200 overflow-y-auto flex flex-col shadow-2xl z-10">
-                    <Collapsible open={isIdeateOpen} onOpenChange={setIsIdeateOpen} className="border-b border-gray-200">
-                        <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-slate-50 text-left">
-                            <div className="flex items-center gap-3">
-                                <Lightbulb className="w-5 h-5 text-purple-600" />
-                                <span className="text-base font-semibold text-gray-800">Stealth Pitch</span>
-                            </div>
-                            {isIdeateOpen ? <ChevronUp className="w-5 h-5 text-gray-500" /> : <ChevronDown className="w-5 h-5 text-gray-500" />}
-                        </CollapsibleTrigger>
-                        <CollapsibleContent className="p-4 pt-1 bg-slate-50/70">
-                            <p className="text-sm text-gray-600 mb-4">A confidential approach to seeking investment or partnerships, where you quietly and selectively engage potential funders or collaborators without publicizing your intentions.</p>
-                            {/* This section can be built out further with more functionality */}
-                            <div className="w-full flex flex-col gap-2">
-
-                                {ideaTypes.map((idea, index) => (
-                                    <button
-                                        key={idea.title}
-                                        onClick={() => {
-                                            if (selectedValidatePresetItem === index) {
-                                                setSelectedValidatePresetItem(-1);
-                                            }
-                                            else {
-                                                setSelectedValidatePresetItem(index);
-                                            }
-                                        }}
-                                        className={`px-4 py-2 bg-white border-2 rounded-lg gap-2 hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 flex items-center text-center focus:outline-none  ${selectedValidatePresetItem === index ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                                    >
-                                        <idea.icon className={`w-5 h-5  ${selectedValidatePresetItem === index ? 'text-blue-600' : 'text-blue-500'}`} />
-                                        <h3 className="text-sm font-semibold text-gray-800">{idea.title}</h3>
-                                    </button>
-                                ))}
-
-                                {selectedValidatePresetItem === -1 ? <div className="flex items-center my-2">
-                                    <div className="flex-grow border-t border-gray-300"></div>
-                                    <span className="flex-shrink mx-4 text-gray-500 text-sm">OR</span>
-                                    <div className="flex-grow border-t border-gray-300"></div>
-                                </div> :
-                                    <div className="flex my-2">
-                                        <span className="flex-shrink mx-4 text-gray-800 text-sm">Additional Instructions:</span>
-                                    </div>}
-
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        value={customValidatePrompt}
-                                        onChange={(e) => setCustomValidatePrompt(e.target.value)}
-                                        placeholder={selectedValidatePresetItem === -1 ? "Enter a custom prompt..." : "Enter additional instructions..."}
-                                        className="w-full px-4 py-2 bg-white border-2 border-gray-200 rounded-lg focus:outline-none focus:border-gray-600 hover:border-gray-800 transition-all duration-200 text-sm"
-                                    />
-                                </div>
-
-                                <Button
-                                    onClick={() => {
-                                        let validationMetric;
-                                        if (selectedValidatePresetItem !== -1) {
-                                            if (customValidatePrompt) {
-                                                validationMetric = `Validation metric: ${ideaTypes[selectedValidatePresetItem].title} || Extra instructions: ${customValidatePrompt}`;
-                                            }
-                                            else {
-                                                validationMetric = ideaTypes[selectedValidatePresetItem].title;
-                                            }
-                                        }
-                                        else {
-                                            validationMetric = customValidatePrompt;
-                                        }
-                                        generateStealthPitch(validationMetric);
-                                        setGeneratingPitch(true);
-                                    }}
-                                    className="w-full my-1"
-                                    disabled={generatingPitch}
-                                >
-                                    {generatingPitch ? <><LoaderCircle className="w-5 h-5 mr-1 spin-slow" />
-                                        Generating...</> : <><Sparkles className="w-5 h-5 mr-1 " />
-                                        Generate Stealth Pitch</>}
-                                </Button>
-
-                                <RequestGrantButton />
-                            </div>
-
-                        </CollapsibleContent>
-                    </Collapsible>
-
+                <div className="w-96 bg-white border-l border-gray-200 flex flex-col shadow-2xl z-10">
                     <Collapsible open={isEvaluateOpen} onOpenChange={setIsEvaluateOpen} className="border-b border-gray-200">
                         <CollapsibleTrigger className="w-full flex items-center justify-between p-4 hover:bg-slate-50 text-left">
                             <div className="flex items-center gap-3">
@@ -649,8 +519,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
                             )}
                         </CollapsibleContent>
                     </Collapsible>
-                    <div className="p-4 mt-auto border-t border-gray-200">
-                        <div className="p-4 mt-auto border-t border-gray-200 bg-white">
+                    <div className="p-4 border-t border-gray-200 bg-white">
                             <Button
                                 onClick={handleSynthesizeReport}
                                 disabled={isSynthesizing}
@@ -658,7 +527,6 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
                             >
                                 {isSynthesizing ? 'Generating...' : 'Synthesize Full Report'}
                             </Button>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -668,14 +536,6 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
                 onClose={() => setModalOpen(false)}
                 onCreateFromPrompt={createNodeFromPrompt}
                 parentTitle={selectedParentTitle}
-            />
-            <ModalDialog
-                title="Stealth Pitch"
-                content={stealthPitch}
-                open={stealthPitchDialogOpen}
-                setOpen={setStealthPitchDialogOpen}
-                onConfirm={postPitch}
-                onCancel={() => console.log('stealth pitch Cancelled')}
             />
         </div>
     );
