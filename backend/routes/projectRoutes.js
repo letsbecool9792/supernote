@@ -47,7 +47,7 @@ router.route('/:projectId/node/:nodeId')
     .delete(deleteNode);
 
 router.route('/:projectId/nodes/positions')
-    .patch(protect, updateNodePositions);
+    .patch(updateNodePositions);
 
 router.route('/working').get((req, res) => {
     res.status(200).json({ message: 'Project routes are working!' });

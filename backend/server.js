@@ -28,7 +28,7 @@ const app = express();
 
 // --- Core Middleware ---
 app.use(cors({
-  origin: FRONTEND_URL, // Use the variable for consistency
+  origin: [FRONTEND_URL, 'https://supernote-dusky.vercel.app'], // Allow both local and production
   credentials: true,
 }));
 app.use(express.json());
