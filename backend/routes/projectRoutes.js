@@ -11,41 +11,40 @@ import {
     deleteNode,
     updateNodePositions
 } from '../controllers/projectController.js';
-import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 // Routes for getting all projects and creating a new one
 router.route('/')
-    .get(protect, getUserProjects)
-    .post(protect, createProject);
+    .get(getUserProjects)
+    .post(createProject);
 
 // Route for getting a single project by its ID
 router.route('/:projectId')
-    .get(protect, getProjectById);
+    .get(getProjectById);
 
 // Route for the core conversational research loop
 router.route('/:projectId/converse')
-    .post(protect, converseWithNode);
+    .post(converseWithNode);
 
 // Route for generating the final synthesized document
 router.route('/:projectId/synthesize')
-    .post(protect, synthesizeDocument);
+    .post(synthesizeDocument);
 
 // Route for AI to rate the current state of the idea
 router.route('/:projectId/rate')
-    .post(protect, updateProjectRating);
+    .post(updateProjectRating);
 
 // Route to regenerate a single node's content
 router.route('/:projectId/node/:nodeId/regenerate')
-    .put(protect, regenerateNode);
+    .put(regenerateNode);
 
 // Route to generate a validation stealth pitch
 router.route('/:projectId/generate-pitch')
-    .post(protect, generateValidationPitch);
+    .post(generateValidationPitch);
 
 router.route('/:projectId/node/:nodeId')
-    .delete(protect, deleteNode);
+    .delete(deleteNode);
 
 router.route('/:projectId/nodes/positions')
     .patch(protect, updateNodePositions);
