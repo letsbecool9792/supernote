@@ -238,7 +238,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         } finally {
             setIsRating(false);
         }
-    }, [projectId, authenticatedPost]);
+    }, [projectId]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
@@ -286,7 +286,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
             setEdges((eds) => [...eds, { ...newEdge, style: { stroke: "#8b5cf6", strokeWidth: 2 } }]);
             triggerRatingUpdate();
         }
-    }, [nodes, selectedParentId, projectId, setNodes, setEdges, triggerRatingUpdate, authenticatedPost]);
+    }, [nodes, selectedParentId, projectId, setNodes, setEdges, triggerRatingUpdate]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const loadProject = useCallback(async () => {
         setIsLoading(true);
@@ -319,7 +319,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         } finally {
             setIsLoading(false);
         }
-    }, [projectId, setNodes, setEdges, authenticatedGet]);
+    }, [projectId, setNodes, setEdges]); // eslint-disable-line react-hooks/exhaustive-deps
 
     const lastUpdatePositionsRef = useRef<number | null>(null);
 
@@ -345,7 +345,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         } finally {
 
         }
-    }, [projectId, nodes, authenticatedPatch]);
+    }, [projectId, nodes]); // eslint-disable-line react-hooks/exhaustive-deps
 
 
 
