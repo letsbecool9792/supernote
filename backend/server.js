@@ -34,15 +34,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-app.use(clerkMiddleware()); // Clerk authentication middleware
 
-
-// --- Public Authentication Routes ---
-// These handle the browser redirects for login/logout/callback
-app.use('/auth', authRoutes);
-
-
-// --- Health Check & Protected API Routes ---
+// --- Public Routes (before Clerk middleware) ---
 app.get('/', (req, res) => {
     res.send('AI Research Synthesizer API is running...');
 });
@@ -51,8 +44,17 @@ app.get('/api', (req, res) => {
     res.send('AI Research Synthesizer API is running...');
 });
 
-// UPDATED: Apply the `protect` middleware to all API route groups
-app.use('/api/idea', ideaRoutes); // Removed protect - cross-domain Clerk auth issue
+// Public idea analysis endpoint (no auth required)
+app.use('/api/idea', ideaRoutes);
+
+// Apply Clerk middleware for protected routes
+app.use(clerkMiddleware());
+
+// --- Public Authentication Routes ---
+// These handle the browser redirects for login/logout/callback
+app.use('/auth', authRoutes);
+
+// --- Protected API Routes ---
 app.use('/api/project', protect, projectRoutes);
 app.use('/api/stealth', protect, stealthRoutes);
 app.use('/api/documents', protect, documentRoutes);
