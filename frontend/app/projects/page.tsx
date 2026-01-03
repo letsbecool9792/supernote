@@ -2,9 +2,9 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { Plus, Search, ArrowRight, Network, Clock } from 'lucide-react';
-import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
+import { useAuthenticatedAxios } from '@/lib/api';
 
 // Interface for the project data received from the backend
 interface Project {
@@ -79,26 +79,30 @@ const ProjectDashboard: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [projects, setProjects] = useState<Project[]>([]);
     const router = useRouter();
+    const { authenticatedGet } = useAuthenticatedAxios();
 
     // Fetch projects from the backend when the component mounts
     useEffect(() => {
         const loadProjects = async () => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project`, { withCredentials: true });
-                if (response?.data) {
+                const response = await authenticatedGet(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project`);
+                if (response?.data && Array.isArray(response.data)) {
                     setProjects(response.data as Project[]);
+                } else {
+                    console.error("Error loading project:", response?.data);
+                    setProjects([]);
                 }
             } catch (error) {
                 console.error("Failed to fetch projects:", error);
-                // Optionally handle error state, e.g., show a toast notification
+                setProjects([]);
             } finally {
                 setIsLoading(false);
             }
         };
         
         loadProjects();
-    }, []);
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Filter projects based on the search query
     const filteredProjects = useMemo(() => {

@@ -6,13 +6,14 @@ import { Download, Eye, Edit3, FileText, ArrowLeft } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import axios from 'axios';
+import { useAuthenticatedAxios } from '@/lib/api';
 
 export default function SynthesizePage() {
     const router = useRouter();
     const params = useParams();
     const projectId = params.id as string;
     const markdownRef = useRef<HTMLDivElement>(null);
+    const { authenticatedPost } = useAuthenticatedAxios();
 
     const [markdown, setMarkdown] = useState('');
     const [isPreview, setIsPreview] = useState(true);
@@ -34,10 +35,9 @@ export default function SynthesizePage() {
                 } else {
                     // If not in localStorage, fetch it from the backend directly
                     console.log("No stored report found, fetching from backend...");
-                    const response = await axios.post(
+                    const response = await authenticatedPost(
                         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/synthesize`,
-                        {},
-                        { withCredentials: true }
+                        {}
                     );
                     if (response.data?.document) {
                         setMarkdown(response.data.document);

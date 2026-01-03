@@ -47,8 +47,10 @@ app.get('/api', (req, res) => {
 // Public idea analysis endpoint (no auth required)
 app.use('/api/idea', ideaRoutes);
 
-// Apply Clerk middleware for protected routes
-app.use(clerkMiddleware());
+// Apply Clerk middleware for protected routes - configured to use Bearer tokens
+app.use(clerkMiddleware({
+  authorizedParties: ['https://supernote-dusky.vercel.app', 'http://localhost:3000']
+}));
 
 // --- Public Authentication Routes ---
 // These handle the browser redirects for login/logout/callback

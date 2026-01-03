@@ -1,14 +1,22 @@
-import { clerkClient, requireAuth } from '@clerk/express';
+import { clerkClient } from '@clerk/express';
 
 /**
- * Protection middleware using Clerk.
- * Ensures the user is authenticated before accessing protected routes.
+ * JWT-based protection middleware for cross-domain requests
+ * Works with Bearer tokens sent from frontend
  */
-export const protect = requireAuth({
-  onError: (error) => {
+export const protect = async (req, res, next) => {
+  try {
+    // clerkMiddleware should have already verified the token and populated req.auth
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).json({ message: 'Unauthorized - not authenticated' });
+    }
+    
+    next();
+  } catch (error) {
     console.error('Auth error:', error);
+    return res.status(401).json({ message: 'Authentication failed', error: error.message });
   }
-});
+};
 
 /**
  * Optional: Middleware to attach user object to request

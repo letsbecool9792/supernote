@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check, Info, Pencil, Sparkles, User, Lightbulb, Target, ArrowUp, ArrowLeft, BrainCircuit } from "lucide-react"
-import axios from "axios"
+import { useAuthenticatedAxios } from "@/lib/api"
 import ReactMarkdown from "react-markdown"
 import { Node } from "reactflow" // Import Node type
 
@@ -37,6 +37,7 @@ export default function IdeaDetailPage() {
     const router = useRouter();
     const params = useParams();
     const { id: currentNodeId } = params;
+    const { authenticatedPost } = useAuthenticatedAxios();
 
     const [isLoadingData, setIsLoadingData] = useState(true);
     const [currentNode, setCurrentNode] = useState<Node<NodeData> | null>(null);
@@ -89,14 +90,13 @@ export default function IdeaDetailPage() {
 
         try {
             // The 'title' field is no longer sent; the backend will generate it.
-            const response = await axios.post(
+            const response = await authenticatedPost(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/converse`,
                 {
                     parentNodeId: currentNode.id,
                     prompt: finalPrompt,
                     position: newPosition,
-                },
-                { withCredentials: true }
+                }
             );
 
             const { newNode } = response.data;

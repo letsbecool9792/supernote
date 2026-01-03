@@ -37,7 +37,7 @@ import {
 } from "lucide-react";
 
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { useAuthenticatedAxios } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
@@ -195,6 +195,7 @@ const nodeTypes = {
 export default function GraphPage({ params }: { params: Promise<{ id: string }> }) {
     const { id: projectId } = use(params);
     const router = useRouter();
+    const { authenticatedGet, authenticatedPost, authenticatedPatch } = useAuthenticatedAxios();
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -225,10 +226,9 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         if (!projectId) return;
         setIsRating(true);
         try {
-            const response = await axios.post(
+            const response = await authenticatedPost(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/rate`,
-                {},
-                { withCredentials: true }
+                {}
             );
             if (response.data && response.data.projectRating) {
                 setProjectRating(response.data.projectRating);
@@ -238,7 +238,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         } finally {
             setIsRating(false);
         }
-    }, [projectId]);
+    }, [projectId, authenticatedPost]);
 
 
 
@@ -268,10 +268,9 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
 
         const newPosition = { x: parentNode.position.x + 400, y: parentNode.position.y };
 
-        const response = await axios.post(
+        const response = await authenticatedPost(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/converse`,
-            { parentNodeId: selectedParentId, prompt, title, position: newPosition },
-            { withCredentials: true }
+            { parentNodeId: selectedParentId, prompt, title, position: newPosition }
         );
 
         const { newNode, newEdge } = response.data;
@@ -287,12 +286,12 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
             setEdges((eds) => [...eds, { ...newEdge, style: { stroke: "#8b5cf6", strokeWidth: 2 } }]);
             triggerRatingUpdate();
         }
-    }, [nodes, selectedParentId, projectId, setNodes, setEdges, triggerRatingUpdate]);
+    }, [nodes, selectedParentId, projectId, setNodes, setEdges, triggerRatingUpdate, authenticatedPost]);
 
     const loadProject = useCallback(async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}`, { withCredentials: true });
+            const response = await authenticatedGet(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}`);
             if (response?.data) {
                 setNodes(response.data.nodes.map((snode: { id: string, title: string, position: { x: number, y: number }, data: { label: string } }) => ({
                     id: snode.id,
@@ -320,7 +319,7 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         } finally {
             setIsLoading(false);
         }
-    }, [projectId, setNodes, setEdges]);
+    }, [projectId, setNodes, setEdges, authenticatedGet]);
 
     const lastUpdatePositionsRef = useRef<number | null>(null);
 
@@ -334,19 +333,19 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         lastUpdatePositionsRef.current = now;
 
         try {
-            await axios.patch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/nodes/positions`,
+            await authenticatedPatch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/nodes/positions`,
                 {
                     updates: nodes.map((node: Node) => ({
                         id: node.id,
                         position: { x: node.position.x, y: node.position.y }
                     }))
-                }, { withCredentials: true });
+                });
         } catch (error) {
             console.error("Error loading project:", error);
         } finally {
 
         }
-    }, [projectId, nodes]);
+    }, [projectId, nodes, authenticatedPatch]);
 
 
 
@@ -384,10 +383,9 @@ export default function GraphPage({ params }: { params: Promise<{ id: string }> 
         }
         setIsSynthesizing(true);
         try {
-            const response = await axios.post(
+            const response = await authenticatedPost(
                 `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project/${projectId}/synthesize`,
-                {},
-                { withCredentials: true }
+                {}
             );
 
             if (response.data?.document) {

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowRight } from 'lucide-react'
 import axios from 'axios';
 import Markdown from 'react-markdown';
+import { useAuthenticatedAxios } from '@/lib/api';
 
 interface AnalysisData {
     analysis: string;
@@ -13,6 +14,7 @@ interface AnalysisData {
 const IdeaAnalysisPage: React.FC = () => {
     const [data, setData] = useState<AnalysisData | null>(null);
     const [, setLoading] = useState<boolean>(false);
+    const { authenticatedPost } = useAuthenticatedAxios();
 
     useEffect(() => {
         // Get data from localStorage when component mounts
@@ -76,7 +78,7 @@ const IdeaAnalysisPage: React.FC = () => {
         console.log('Project:', project);
         setLoading(true);
         try {
-            const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project`, project, { withCredentials: true });
+            const response = await authenticatedPost(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/project`, project);
             if (response?.data) {
                 window.location.href = `/graph/${response.data._id}`;
                 console.log('Response:', response.data);
