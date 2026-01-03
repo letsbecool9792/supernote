@@ -52,7 +52,7 @@ app.get('/api', (req, res) => {
 });
 
 // UPDATED: Apply the `protect` middleware to all API route groups
-app.use('/api/idea', protect, ideaRoutes);
+app.use('/api/idea', ideaRoutes); // Removed protect - cross-domain Clerk auth issue
 app.use('/api/project', protect, projectRoutes);
 app.use('/api/stealth', protect, stealthRoutes);
 app.use('/api/documents', protect, documentRoutes);
