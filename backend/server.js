@@ -61,13 +61,9 @@ app.use('/api/documents', protect, documentRoutes);
 // --- Server Startup ---
 console.log('\n✅ Registered routes:\n', listEndpoints(app), '\n');
 
-// For Vercel serverless deployment
-export default app;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+    console.log(`👂 Accepting requests from frontend at ${FRONTEND_URL}`);
+});
 
-// For local development
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`🚀 Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
-        console.log(`👂 Accepting requests from frontend at ${FRONTEND_URL}`);
-    });
-}
+export default app;
